@@ -1,0 +1,109 @@
+﻿@using WebMatrix.WebData
+@using WebMatrix.Data
+@using System.Linq;
+@section Scripts {
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+}
+@{
+    WebSecurity.RequireAuthenticatedUser();
+
+    Layout     = "~/_SiteLayout.cshtml";
+    Page.Title = "Master Administration Page";
+
+    if (!UserHelper.IsMaster()) {
+        Response.Redirect("~/");
+    }
+
+    Validation.RequireField("name", "You must give a name.");
+    Validation.RequireField("password", "You must give a password.");
+    Validation.Add("shortname", Validator.Regex("^[A-Za-z0-9]+$"));
+
+
+    bool errName = !ModelState.IsValidField("name");
+    bool errShort = !ModelState.IsValidField("shortname");
+    bool errPass = !ModelState.IsValidField("password");
+
+
+    if (IsPost && Validation.IsValid())
+    {
+        if (Request.Form["function"] == "add-client")
+        {
+            ClientHelper.AddClient(
+                Request.Form["name"],
+                Request.Form["shortname"],
+                Request.Form["password"],
+                Request.Form["website"]);
+        }
+    }
+
+    // Query for suggestions
+    var clients = ClientHelper.GetAllClients();
+}
+
+<hgroup class="title">
+    <h1>Clients.</h1>
+    <h2>Manage Library Clients.</h2>
+</hgroup>
+<br/>
+<section>
+<h2>Current Clients</h2>
+<br/>
+<form method="post" id="form">
+<input type="hidden" name="function" value="set-client" />
+<table>
+    <tr>
+        <td><b>Name</b></td>
+        <td><b>Shortname</b></td>
+        <td><b>Website</b></td>
+        <td><b>Available</b></td>
+    </tr>
+
+    @foreach (var row in clients)
+    {
+        <tr>
+            <td>@row.Name</td>
+            <td>@row.Shortname</td>
+            <td>@(row.Website??"<null>")</td>
+            <td><input type="checkbox" name="@row.ID-available" @(row.Active ? "checked" : "") /></td>
+        </tr>
+    }
+</table>
+<br/>
+
+</form>
+</section>
+<section>
+    <h2>Add Client</h2>
+    <p>Entries in bold are required. The rest are optional and can be left blank.</p>
+    <p>Hover over an input to see a further description.</p>
+    <br />
+	<p><b>Remember to first add the lowercase shortname (stringID) to the web.config.</b></p>
+	<p><b>The clients's tables must be manually created.</b></p>
+    <br />
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="function" value="add-client" />
+        @AntiForgery.GetHtml()
+        <table>
+            <tr title="The name of the client">
+                <td><b @if (errName) { <text> class="error-label" </text> }>Name</b></td>
+                <td><input type="text" name="name" @Validation.For("name")></td>
+            </tr>
+            <tr title="The client's shortname. Must be strictly alphanumeric.">
+                <td><b @if (errShort) { <text> class="error-label" </text> }>Shortname</b></td>
+                <td><input type="text" name="shortname" @Validation.For("shortname")></td>
+            </tr>
+            <tr title="The client's website URL.">
+                <td>Website</td>
+                <td><input type="text" name="website" @Validation.For("website")></td>
+            </tr>
+            <tr title="Whether the client can view but not alter the library.">
+                <td><b @if (errPass) { <text> class="error-label" </text> }>DB Password</b></td>
+                <td><input type="password" name="password" checked @Validation.For("password")></td>
+            </tr>
+        </table>
+        @Html.ValidationSummary("Please re-enter any incorrect inputs before continuing.", excludeFieldErrors: false, htmlAttributes: null)
+        <br />
+        <input type="submit" value="Add Client" />
+    </form>
+</section>

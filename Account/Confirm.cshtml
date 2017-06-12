@@ -82,7 +82,7 @@
     // If they have no existing email, use the student one
     string userEmail = Request.Form["email"] ?? user.Email ?? studentid + "@sms.ed.ac.uk";
     string firstName = Request.Form["firstName"] ?? user.FirstName;
-    string lastName  = Request.Form["firstName"] ?? user.FirstName;
+    string lastName  = Request.Form["lastName"] ?? user.LastName;
 }
 
 <hgroup class="title">
@@ -105,7 +105,7 @@
             </li>
             <li>
                 <label for="lastName" @if (!ModelState.IsValidField("lastName")) { <text> class="error-label" </text> }>Last Name</label>
-                <input type="text" id="lastName" name="lastName" value="@user.LastName" @Validation.For("lastName") />
+                <input type="text" id="lastName" name="lastName" value="@lastName" @Validation.For("lastName") />
                 @Html.ValidationMessage("lastName")
             </li>
             <li>

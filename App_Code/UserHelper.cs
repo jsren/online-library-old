@@ -266,4 +266,20 @@ public static class UserHelper
             catch { return false; }
         }
     }
+
+    public static void ResetPassword(string uun)
+    {
+        Website.WithDatabase((db) =>
+        {
+            // Delete the user entry - it will be re-created 
+            db.Execute(@"
+                BEGIN TRANSACTION;
+                    DECLARE @uid int;
+                    SET @uid = (SELECT UserID FROM UserProfile WHERE Email=@0);
+                    DELETE FROM UserProfile WHERE UserID=@uid;
+                    DELETE FROM [webpages_Membership] WHERE UserID=@uid;
+                COMMIT;
+            ", uun);
+        });
+    }
 }

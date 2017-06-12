@@ -1,3 +1,5 @@
-
+*.pubxml
 /Web.config
 /Hidden
+*.publishproj
+.vs/

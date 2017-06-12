@@ -42,12 +42,18 @@
         var group = Request.QueryString["group"];
         LibraryHelper.RemoveMemberFromGroup(group.AsInt(), member);
     }
+    else if (action == "resetpass")
+    {
+        var member = Request.QueryString["id"];
+        UserHelper.ResetPassword(member);
+    }
 
     if (redir == "TODO") { Response.RedirectPermanent("~/Admin/Loans"); }
     else if (redir == "pieces") { Response.RedirectPermanent("~/Admin/Library"); }
     else if (redir == "suggestions") { Response.RedirectPermanent("~/Admin/Suggestions"); }
     else if (redir == "parts") { Response.RedirectPermanent(Request.UrlReferrer.ToString()); }
     else if (redir == "groups") { Response.RedirectPermanent("~/Admin/Groups"); }
+    else if (redir == "members") { Response.RedirectPermanent("~/Admin/Members"); }
     else if (redir == "groupmembers") { Response.RedirectPermanent(Request.UrlReferrer.ToString()); }
 
 }
