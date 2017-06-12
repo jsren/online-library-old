@@ -1,0 +1,181 @@
+﻿@{
+    Page.Title = "Loan";
+    Layout = "~/_SiteLayout.cshtml";
+
+    // Make sure we're logged in before continuing
+    if (!WebSecurity.IsAuthenticated)
+    {
+        Response.Redirect("~/Account/Login");
+        return;
+    }
+
+    var pieces = LibraryHelper.GetLoanablePieces();
+
+    IEnumerable<dynamic> parts = null, loans = null;
+
+    dynamic pieceRecord = null;
+    dynamic partRecord = null;
+
+    if (IsPost)
+    {
+        var piece = Request.Form["piece"];
+        var part = Request.Form["part"];
+        var format = Request.Form["format"];
+
+        parts = LibraryHelper.GetParts(piece);
+
+        // Get the actual record for the pieceID
+        foreach (var p in pieces)
+        {
+            if (p.ID.ToString() == piece) { pieceRecord = p; }
+        }
+
+        // User has specified part
+        if (!String.IsNullOrWhiteSpace(part))
+        {
+            foreach (var p in parts)
+            {
+                if (p.ID.ToString() == part) { partRecord = p; }
+            }
+            if (partRecord != null)
+            {
+                loans = LibraryHelper.GetCurrentLoans(part);
+            }
+        }
+
+        // User sumbmitted complete form - now attempt to create loan
+        if (!String.IsNullOrWhiteSpace(format))
+        {
+            if (LibraryHelper.CanLoan(partRecord))
+            {
+                // Create new loan record
+                LibraryHelper.CreateLoan(part, format, Website.CalculateReturnDate(pieceRecord));
+
+                // Perform download of resource if available
+                if (format == Website.Format_DigitalCopy.ToString())
+                {
+                    Response.Redirect("~/ThankYou?err=Download&dl=" + part); return;
+                }
+                // Otherwise, just display thank you page
+                else { Response.Redirect("~/ThankYou?err=Success"); return; }
+            }
+            else { Response.Redirect("~/ThankYou?err=ReqInvalid"); return; }
+        }
+    }
+}
+
+<form class="multipanel" method="post">
+    <div class="panel" data-number="1">
+        <h2 class="title">Select the Piece</h2>
+        <div class="content-center">
+            <select name="piece" @if (IsPost) { <text> disabled </text>  }>
+
+                @{ var groupedPieces = Website.GroupPiecesByLibraries(pieces); }
+                @foreach (var libraries in groupedPieces.Keys)
+                {
+                    <optgroup label="@String.Join(' ' + Locale.Messages["and"] + ' ', libraries)">
+                        @foreach (var piece in groupedPieces[libraries])
+                        {
+                            bool sel = Request.Form["piece"].AsInt(-1) == piece.ID;
+                            <option selected="@sel" value="@piece.ID">@piece.Title</option>
+                        }
+                    </optgroup>
+                }
+            </select>
+            @if (!IsPost)
+            { <input type="submit" style="margin-left:20px" value="Select" /> }
+            else
+            { <input type="hidden" name="piece" value="@Request.Form["piece"]"/> }
+        </div>
+    </div>
+    @if (IsPost)
+    { 
+    <div class="panel" data-number="2">
+        <h2 class="title">Select the Part</h2>
+        <div class="content-center">
+            <select name="part" @if (loans != null) { <text>disabled </text> }>
+                @foreach (var part in parts)
+                {
+                    bool sel = Request.Form["part"].AsInt(-1) == part.ID;
+                    <option selected="@sel" value="@part.ID">@part.Designation</option>
+                }
+            </select>
+            @if (loans == null)
+            { <input type="submit" style="margin-left:20px" value="Select" /> }
+            else
+            { 
+                <input type="hidden" name="part" value="@Request.Form["part"]"/> }
+        </div>
+    </div>
+            if (loans != null)
+            {
+            <div class="panel" data-number="3">
+                <h2 class="title">Request Loan</h2>
+                <div class="content">
+                    @if (partRecord.Count != null && LibraryHelper.IsRenting(loans))
+                    {
+                    <p>
+                        Our records show that you are currently renting a copy of this part.
+                        You may not rent more than one copy of a part at a time.
+                    </p>
+                    <p>
+                        For digital or paper copies, you must return your current copy before
+                        continuing. This may be able to be performed <a href="~/MyMusic">online</a>.
+                    </p>
+                    }
+                    else if (partRecord.Count != null && loans.Count() >= partRecord.Count)
+                    {
+                        <p>
+                            Unfortunately all available copies of the selected part are
+                            currently on loan.
+                        </p>
+                        <p>
+                            Please try again later or <a href="~/Contact">contact</a> your librarian for
+                            assistance if urgent.
+                        </p>
+                    }
+                    else
+                    {
+                        <br />
+                        <div style="margin-left:10%">
+                            Sheet Music Format: &nbsp;
+                            <select id="formselect" name="format">
+                                @if (partRecord.CanLendDigital)
+                                { <option value="2">Digital Copy</option> }
+                                @if (partRecord.CanLendCopy)
+                                { <option value="1">Paper Copy</option> }
+                                @if (partRecord.CanLendOriginal)
+                                { <option value="0">Original Sheet</option> }
+                            </select>
+                        </div>
+                        <br />
+
+                        <h3>Please make sure that you have read the <a href="~/Legal">terms of service</a> before continuing.</h3>
+                        <br />
+                                if (partRecord.Deposit > 0)
+                                {
+                            <p><b>If requesting the original (not a copy), this part requires you to put down a deposit of
+                                @Website.GetPounds(partRecord.Deposit). Please bring this to the next rehearsal.</b></p>
+                            
+                                }
+
+                        <em>@pieceRecord.NotesUponLoan</em>
+                        <br />
+                        <p>You may borrow this piece until @Website.CalculateReturnDate(pieceRecord).ToString("dd/MM/yyyy")</p>
+                        
+                        <input type="submit" value="Accept and Request" onclick="window.location.href='/ThankYou'" />
+                    }
+                    </div>
+            </div>
+            }
+            else if (partRecord != null)
+            {
+            <div style="margin: 20px auto">
+                <p class="message-error">Cannot process your request.</p>
+            </div>
+            }
+    }
+
+    <input type="button" class="reset-btn" value="Start Over" onclick="window.location.href='Loan'"/>
+
+</form>

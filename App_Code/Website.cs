@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Web;
 using System.Web.SessionState;
+using WebMatrix.WebData;
 
 
 /// <summary>
@@ -19,15 +20,6 @@ using System.Web.SessionState;
 /// </summary>
 public static partial class Website
 {
-    /// <summary>
-    /// Use to conditionally show or hide an HTML element.
-    /// </summary>
-    public static string ShowIf(bool cond)
-    {
-        if (!cond) return "style=visibility:hidden";
-        else       return "style=visibility:visible";
-    }
-
     public static bool IsChoir(int libraryValue)
     {
         return (libraryValue & Website.Library_Choir) != 0;
@@ -259,15 +251,14 @@ public static partial class Website
 
     public static T WithDatabase<T>(Func<WebMatrix.Data.Database, T> lambda)
     {
-        using (var db = WebMatrix.Data.Database.Open(Website.DBName)) {
+        using (var db = WebMatrix.Data.Database.Open(ClientHelper.CurrentClient.StringID)) {
             return lambda.Invoke(db);
         }
     }
     public static void WithDatabase(Action<WebMatrix.Data.Database> lambda)
     {
-        using (var db = WebMatrix.Data.Database.Open(Website.DBName)) {
+        using (var db = WebMatrix.Data.Database.Open(ClientHelper.CurrentClient.StringID)) {
             lambda.Invoke(db);
         }
     }
-
 }

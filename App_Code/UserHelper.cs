@@ -53,6 +53,16 @@ public static class UserHelper
             "SELECT COUNT(1) FROM Members WHERE UUN=@0 AND IsAdmin='1'", studentID) == 1);
     }
 
+    public static bool IsMaster()
+    {
+        return IsMaster(WebSecurity.CurrentUserId);
+    }
+    public static bool IsMaster(int id)
+    {
+        return Website.WithDatabase((db) => (int)db.QueryValue(
+            "SELECT COUNT(1) FROM [master].Masters WHERE [User]=@0", id) == 1);
+    }
+
     public static Tuple<string, string> SplitFullName(string fullName)
     {
         fullName = fullName.Trim();

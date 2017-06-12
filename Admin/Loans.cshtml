@@ -7,7 +7,7 @@
     if (!UserHelper.IsAdmin()) {
         Response.RedirectPermanent("~/Account/ExternalLoginFailure");
     }
-    Layout     = "~/Library/_SiteLayout.cshtml";
+    Layout     = "~/_SiteLayout.cshtml";
     Page.Title = "Loans";
 
     var action = Request.Form["action"];

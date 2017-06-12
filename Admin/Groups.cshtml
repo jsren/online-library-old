@@ -4,11 +4,11 @@
     <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 }
 @{
-    Layout = "~/Library/_SiteLayout.cshtml";
+    Layout = "~/_SiteLayout.cshtml";
     Page.Title = "Manage Groups";
 
     if (!UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/");
+        Response.RedirectPermanent("~/");
     }
 
     Validation.RequireField("name", "You must specify the group name.");

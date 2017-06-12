@@ -29,7 +29,7 @@ public static partial class Website
     public const int Format_PaperCopy   = 1;
     public const int Format_DigitalCopy = 2;
 
-    public static readonly string DBName    = "musicDB"; //"musicDBLocal";
+    public static readonly string DBName    = "musicDB";
     public static readonly string HiddenDir = "~/Hidden/";
     public static readonly string Webmaster = "jsrenwick3@gmail.com";
     public static readonly string GuestUUN  = "s0000000";

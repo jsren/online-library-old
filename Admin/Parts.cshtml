@@ -4,14 +4,14 @@
     <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 }
 @{
-    Layout     = "~/Library/_SiteLayout.cshtml";
+    Layout     = "~/_SiteLayout.cshtml";
     Page.Title = "Manage Library";
 
     string limitTitle = "If checked, indicates that there are a limited number of copies available. " +
         "This is often the case with purchased or rented parts.";
 
     if (!UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/");
+        Response.RedirectPermanent("~/");
     }
 
     Validation.RequireField("designation", "You must specify the part designation.");
@@ -22,7 +22,7 @@
     int.TryParse(Request.QueryString["pieceID"], out pieceID);
 
     if (pieceID < 0) {
-        Response.RedirectPermanent("~/Library/ThankYou?err=InvalidPieceID");
+        Response.RedirectPermanent("~/ThankYou?err=InvalidPieceID");
     }
 
     string pieceTitle = Request.QueryString["pieceTitle"] ?? "#Error: Unable to get title";

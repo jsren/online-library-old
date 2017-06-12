@@ -1,0 +1,141 @@
+﻿@section Scripts {
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+}
+@{
+    Page.Title = "Piece Suggestions";
+    Layout     = "~/_SiteLayout.cshtml";
+
+    bool errTitle = false;
+
+    IEnumerable<int> endorsed = new int[0];
+
+    if (IsPost)
+    {
+        if (Request.Form["action"] == "endorse")
+        {
+            Suggestions.ToggleEndorse(Request.Form["id"].AsInt());
+        }
+        else if (Request.Form["action"] == "suggest")
+        {
+            Validation.RequireField("title", "You must specify the piece title and, optionally, author.");
+            Validation.RequireField("group", "You must choose the group for which to make the suggestion.");
+
+            errTitle = !ModelState.IsValidField("title");
+
+            AntiForgery.Validate();
+            if (Validation.IsValid())
+            {
+                Suggestions.Create(
+                    Request.Form["title"],
+                    Request.Form["group"].AsInt()
+                );
+            }
+        }
+        else { throw new Exception("Unknown action."); }
+    }
+
+    endorsed = Suggestions.GetEndorsed().Cast<int>();
+}
+
+<style>
+    img.button {
+        width       : 36px;
+        opacity     : 0.4;
+        cursor      : pointer;
+        margin-right: 2px;
+        margin-left : 2px;
+        display     : inline;
+    }
+    img.button:hover {
+        opacity: 1;
+    }
+    img.button[data-toggle='1'] {
+        opacity: 1;
+    }
+    .suggest {
+        display: inline-block;
+        margin-right: 20px;
+    }
+    .suggest * {
+        margin-top: 0;
+    }
+    li.suggestion .buttons {
+        visibility: visible;
+        display   : inline-block;
+    }
+    li.suggestion:hover .buttons {
+        visibility: visible;
+    }
+</style>
+
+<form id="endorse-form" method="post">
+    <input type="hidden" name="action" value="endorse" />
+    <input id="endorse-id" type="hidden" name="id" />
+</form>
+
+<script>
+    function endorse(btn) {
+        document.getElementById('endorse-id').value = btn.getAttribute('data-id');
+        document.getElementById('endorse-form').submit();
+    }
+    function openYouTube(btn) {
+        var query = btn.getAttribute('data-query');
+        query = query.replace(/[\.,-\/#!$%\^&\*;:{}=\-_`~()]/g," ");
+        query = query.replace(/\s{2,}/g, " ");
+        query = query.replace(" ", "+");
+        window.open("https://www.youtube.com/results?search_query="+query);
+    }
+</script>
+
+<div>
+    <hgroup class="title">
+        <h1>Suggestions.</h1>
+        <h2>Suggest and vote on pieces for next semester.</h2>
+    </hgroup>
+
+    <br/>
+    <section>
+        <ol class="round">
+            @foreach (var entry in Suggestions.GetAll())
+            { 
+            <li class="suggestion">
+                <div class="suggest">
+                    <h3>@entry.Title</h3><p title="@entry.Group.Description">@entry.Group.Name &nbsp;</p>
+                </div>
+                <div class="buttons">
+                    <img class="button" src="~/Images/thumb.png" title="Endorse/Unendorse suggestion" data-id="@entry.Suggestion" onclick="endorse(this)" 
+                         @if (endorsed.Contains((int)entry.Suggestion)) { <text>data-toggle="1"</text> } />
+                    <img class="button" src="~/Images/youtube.png" title="Search on YouTube" data-query="@entry.Title" onclick="openYouTube(this)" />
+                </div>
+            </li>
+            }
+        </ol>
+    </section>
+    <br />
+    <br />
+    <section>
+        <h2>Add Suggestion</h2>
+        <br />
+        <form method="post">
+            @AntiForgery.GetHtml()
+            <input type="hidden" name="action" value="suggest" />
+            <label @if (errTitle){ <text> class="error-label" </text>  }>Title &amp; Author</label>
+            <input type="text" name="title" @Validation.For("title") />
+
+            @foreach (var group in LibraryHelper.GetGroups())
+            {
+                if (!group.CanSuggest) { continue; }
+
+                <div title="@group.Description">
+                    <input type="radio" style="width:initial" id="r-@group.ID" name="group" value="@group.ID" @Validation.For("group")/>
+                    <label style="display:inline" for="r-@group.ID">@group.Name</label>
+                </div>
+            }
+            <br />
+            <input type="submit" value="Add" />
+        </form>
+        <br />
+        @Html.ValidationSummary("Please correct the following input errors:", excludeFieldErrors: false, htmlAttributes: null)
+    </section>
+</div>

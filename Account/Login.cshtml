@@ -14,13 +14,13 @@
 }
 
 @{
-    Layout     = "~/Library/_SiteLayout.cshtml";
+    Layout     = "~/_SiteLayout.cshtml";
     Page.Title = "Log in";
 
     // If already logged-in, just go to MyMusic
     if (WebSecurity.IsAuthenticated)
     {
-        Response.Redirect("~/Library/MyMusic");
+        Response.Redirect("~/MyMusic");
         return;
     }
 
@@ -31,7 +31,7 @@
     var firstTime  = Request.QueryString["init"].AsBool(false);
 
     var returnUrl = Request.QueryString["ReturnUrl"];
-    if (returnUrl.IsEmpty()) { returnUrl = Href("~/Library/MyMusic"); }
+    if (returnUrl.IsEmpty()) { returnUrl = Href("~/MyMusic"); }
 
     // Set up validation
     Validation.RequireField("studentid", Locale.Messages["ErrorUUN"]);
@@ -133,10 +133,12 @@
                     @Html.ValidationMessage("studentid")
                 </li>
                 <li class="password">
-                    <label for="password" id="passwordtxt" @Website.ShowIf(!firstTime) @if (!ModelState.IsValidField("password")) { <text> class="error-label" </text> }>Password</label>
-                    <input type="password" id="password" @Website.ShowIf(!firstTime) name="password" @Validation.For("password")/>
-                    @* Write any password validation errors to the page *@
-                    @Html.ValidationMessage("password")
+                    @if (!firstTime) { 
+                        <label for="password" id="passwordtxt" @if (!ModelState.IsValidField("password")) { <text> class="error-label" </text> }>Password</label>
+                        <input type="password" id="password" name="password" @Validation.For("password")/>
+                        @* Write any password validation errors to the page *@
+                        @Html.ValidationMessage("password")
+                    }
                 </li>
                 <li class="remember-me">
                     <input type="checkbox" id="firstTime" name="firstTime" checked="@firstTime" onchange="onFirstTimeChange()" />

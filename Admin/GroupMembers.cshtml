@@ -4,11 +4,11 @@
     <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 }
 @{
-    Layout     = "~/Library/_SiteLayout.cshtml";
+    Layout     = "~/_SiteLayout.cshtml";
     Page.Title = "Manage Library";
 
     if (!UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/");
+        Response.RedirectPermanent("~/");
     }
 
 
@@ -17,7 +17,7 @@
     int.TryParse(Request.QueryString["groupID"], out groupID);
 
     if (groupID < 0) {
-        Response.RedirectPermanent("~/Library/ThankYou?err=InvalidGroupID");
+        Response.RedirectPermanent("~/ThankYou?err=InvalidGroupID");
     }
 
     string groupName = Request.QueryString["groupName"] ?? "#Error: Unable to get name";

@@ -1,9 +1,9 @@
 ﻿@{
-    Layout = "~/Library/_SiteLayout.cshtml";
+    Layout = "~/_SiteLayout.cshtml";
     Page.Title = "Manage Library";
 
     if (!UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/");
+        Response.RedirectPermanent("~/");
     }
 
     string pieceName = Request.QueryString["pieceName"] ?? "<unknown>";

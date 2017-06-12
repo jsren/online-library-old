@@ -1,0 +1,62 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+    
+    if (IsPost)
+    {        
+        string id = Request.QueryString["id"];
+        
+        // Verify that return is possible
+        var db  = Database.Open(Website.DBName);
+        var res = db.QuerySingle("SELECT * FROM Loans WHERE ID=@0", id);
+        
+        if (res.Format == 0) {
+            throw new Exception("Attempt made to return original copy online.");
+        }
+        if (res.Returned) {
+            throw new Exception("Cannot return item - item already returned");
+        }
+
+        db.Execute("UPDATE Loans SET Returned='1', ReturnedOn=GETDATE() WHERE ID=@0", id);
+        Response.Redirect("~/MyMusic");
+        return;
+    }
+}
+
+<div>
+    <hgroup class="title">
+        <h1>Returns.</h1>
+        <h2>Return your music.</h2>
+    </hgroup>
+
+    <br/>
+    <section>
+        <h3>Please read the following carefully</h3>
+        <p>
+        I hereby testify that I have ensured either the return or destruction,
+        as requested, of the sheet music lent to me.
+        </p>
+        <p>I understand that to possess more than one copy of the source for such uses 
+        as can be constituted "fair" without prior permission from the copyright holder 
+        is a breach of copyright law.
+        </p>
+        <p>
+        I take full responsibility for copyright infringement where 
+        such infringement is due to my actions and where it is in contradiction
+        with the <a href="~/Legal">terms of use of this service</a>. 
+        </p>
+        <p>
+        By clicking 'Agree and Return', I am acknowledging that I have acted in accordance with
+        the <a href="~/Legal">terms of use of this service</a> and copyright law as it 
+        exists in this country.
+        </p>
+    </section>
+
+    <br/>
+    <section>
+        <form method="post">
+            <input type="submit" value="Agree and Return" />
+            <input type="button" value="Cancel" onclick="document.location.href='MyMusic'" />
+        </form>
+    </section>
+
+</div>

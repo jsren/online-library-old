@@ -6,10 +6,11 @@
     <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 }
 @{
-    WebSecurity.RequireAuthenticatedUser();
 
-    Layout     = "~/Library/_SiteLayout.cshtml";
+    Layout     = "~/_SiteLayout.cshtml";
     Page.Title = "Loans";
+
+    WebSecurity.RequireAuthenticatedUser();
 
     if (!UserHelper.IsAdmin()) {
         Response.Redirect("~/");
@@ -24,6 +25,8 @@
     bool errUUN   = !ModelState.IsValidField("uun");
     bool errFName = !ModelState.IsValidField("fname");
     bool errLName = !ModelState.IsValidField("lname");
+
+    bool color = false; // Used to create banding in table
 
     if (IsPost)
     {
@@ -119,6 +122,9 @@
 <br/>
 <form method="post" id="form">
 <input type="hidden" name="function" value="set-member" />
+<style>
+    .table-band { background-color: #DDD }
+</style>
 <table>
     <tr>
         <td><b>UUN</b></td>
@@ -132,8 +138,9 @@
 
     @foreach (var row in members)
     {
+        color = !color;
         var name = row.FirstName + ' ' + row.LastName;
-        <tr>
+        <tr class="@(color?"table-band":"")" >
             <td>@row.UUN</td>
             <td>@name</td>
             <td><input type="checkbox" name="@row.UUN-member"    @(row.IsMember    ? "checked" : "")/></td>

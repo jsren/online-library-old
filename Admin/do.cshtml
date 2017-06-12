@@ -2,7 +2,7 @@
 @{
     // Redirect to error if not authenticated
     if (!WebSecurity.IsAuthenticated || !UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/ThankYou"); return;
+        Response.RedirectPermanent("~/ThankYou"); return;
     }
 
     var action = Request.QueryString["action"];
@@ -27,7 +27,7 @@
     {
         var group = Request.QueryString["id"];
         if (group.AsInt() == Website.Library_Orchestra || group.AsInt() == Website.Library_Choir) {
-            Response.Redirect("~/Library/ThankYou?err=InvalidOperationException&desc=Cannot%20remove%20primary%20groups");
+            Response.Redirect("~/ThankYou?err=InvalidOperationException&desc=Cannot%20remove%20primary%20groups");
         }
         else if (group != null) { LibraryHelper.HideGroup(group); }
     }

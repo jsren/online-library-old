@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "~/_SiteLayout.cshtml";
+}
+
+<script type="text/javascript">
+
+    function getRandomInt(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+    }    
+
+    var info = [
+        ["../Images/library.jpg",
+        '<h2>Suggest Pieces for Next Semester</h2>' +
+        '<p>Quickly and easily make suggestions for pieces for us to play next semester with the new <em><a href="/Suggest">Suggestions</a></em> page. ' +
+        'Here you can view others\' suggestions, \'endorse\' them and search for videos of existing performances.</p>'],
+    ]
+
+    var infoIndex = getRandomInt(0, info.length);
+    
+    function loadInfo(index)
+    {
+        if (info.length == 0) return;
+
+        var banner = document.getElementById("infobanner");
+        var host   = document.getElementById("info_host");
+
+        banner.style.backgroundImage = 'url(' + info[index][0] + ')';
+        host.innerHTML               = info[index][1];
+    }
+
+    function infoLeft()
+    {
+        if (--infoIndex == -1) { 
+            infoIndex = info.length - 1;
+        }
+        loadInfo(infoIndex)
+    }
+    function infoRight()
+    {
+        if (++infoIndex == info.length) { 
+            infoIndex = 0;
+        }
+        loadInfo(infoIndex)
+    }
+
+
+    loadInfo(infoIndex)
+</script>
+
+@section featured {
+<section class="featured">
+    <div class="content-wrapper">
+        <img src="@ClientHelper.GetBigImage()" style="float: left; margin: 10px 20px 10px -10px" alt="Music" width="200"/>
+        <div style="display: inline-block; padding-left: 10px">
+            <hgroup class="title">
+                <h1>Welcome to the @ClientHelper.CurrentClient.Shortname online music library</h1>
+            </hgroup>
+            <p>
+                If you haven't already, please <a href="~/Account/Login.cshtml">log in here</a> 
+                to access the library. 
+                <br/>
+                Requesting or downloading music is <b>only available to society members</b>.
+            </p>
+        </div>
+    </div>
+</section>
+}
+
+@section infobanner {
+<div id="infobanner">
+    <div class="arrowL" onclick="infoLeft()"></div>
+    <div class="arrowR" onclick="infoRight()"></div>
+    <div id="info_host" class="overlay"></div>
+</div>
+}
+
+<h3>Where to Begin</h3>
+
+<ul class="round">
+    <li class="note">
+        <h5>First-Time User? Confirm your Details</h5>
+        If you are already a member of the EUMM society, you should be registered with library.
+        In this case, you will merely need to <a href="~/Account/Login?init=true">confirm your details with us</a> and you'll be able to
+        log in.
+    </li>
+    <li class="note">
+        <h5>Not a Member?</h5>
+        Join the society! Come along on a thursday night and see a member of our committee for
+        details on how to become a full member.
+        <a href="http://www.eusa.ed.ac.uk/societies/society/EUMM2011/">Our website…</a>
+    </li>
+    <li class="note">
+        <h5>How do I Take Sheet Music Home?</h5>
+        You're at the right place! Simply go to <a href="~/MyMusic"><em>My Music</em></a>, click 'Request New Loan', 
+        select the part and type of copy you would like and the music will be available for you to download now or 
+        to pick up at the next rehearsal. 
+        Not all pieces will allow you to take home the sheet music, however, and for some you may have to put down a deposit.
+    </li>
+    <li class="note">
+        <h5>Contacting the Librarian</h5>
+        If you believe that you've lost, damaged or defaced a hard copy of a piece, please contact the librarian as soon as you are able.
+        Otherwise, if you have any questions about the music or our loans policy, if you wish to make a complaint, give music suggestions 
+        or buy the hard-working librarian team a pint, feel free to get in touch!
+
+        Contact details for the librarians can be found on the <a href="~/AboutUs#committee">Committee</a> page. Alternatively, post a message on the 
+        <a href="https://www.facebook.com/groups/307200819293452/">Facebook</a> group, send us an <a href="~/">e-mail</a>
+        or come meet us in person at rehearsals.
+    </li>
+</ul>

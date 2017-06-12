@@ -4,11 +4,11 @@
     <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
 }
 @{
-    Layout = "~/Library/_SiteLayout.cshtml";
+    Layout = "~/_SiteLayout.cshtml";
     Page.Title = "Manage Library";
 
     if (!UserHelper.IsAdmin()) {
-        Response.RedirectPermanent("~/Library/");
+        Response.RedirectPermanent("~/");
     }
 
     Validation.RequireField("title", "You must specify the piece title.");
