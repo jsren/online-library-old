@@ -22,9 +22,9 @@ public static class ClientHelper
                 // Query DB or use default if not a known user
                 using (var db = WebMatrix.Data.Database.Open("default"))
                 {
-                    if (WebSecurity.HasUserId)
+                    if (WebSecurity.HasUserId && !string.IsNullOrWhiteSpace(WebSecurity.CurrentUserName))
                     {
-                        var v = db.QueryValue("SELECT [Client] FROM [master].ClientUsers WHERE [User]=@0", (int)WebSecurity.CurrentUserId);
+                        var v = db.QueryValue("SELECT [Client] FROM [master].ClientMembers WHERE [Member]=@0", WebSecurity.CurrentUserName);
                         HttpContext.Current.Session["clientID"] = (int)v;
 
                         // Clear any existing client
@@ -157,11 +157,29 @@ public static class ClientHelper
         }
     }
 
+    public static void RegisterMember(string clientID, string username, WebMatrix.Data.Database db)
+    {
+        db.Execute(@"INSERT INTO [master].ClientMembers VALUES (@0, @1)", clientID, username);
+    }
+    public static void UnregisterMember(string clientID, string username, WebMatrix.Data.Database db)
+    {
+        db.Execute(@"DELETE FROM [master].ClientMembers WHERE [Client]=@0 AND [Member]=@1", clientID, username);
+    }
+
+    public static IEnumerable<dynamic> ClientsForMember(string username)
+    {
+        using (var db = WebMatrix.Data.Database.Open(Website.DBName))
+        {
+            return db.Query(@"SELECT [Client] FROM [master].ClientMembers WHERE [Member]=@0", username);
+        }
+    }
+
     public static void ActivateClient(string stringID)
     {
         using (var db = WebMatrix.Data.Database.Open(Website.DBName))
         {
             db.Execute("GRANT DELETE, INSERT, SELECT, UPDATE ON SCHEMA :: [@0] TO [@0]".Replace("@0", stringID));
+            db.Execute("GRANT DELETE, INSERT, SELECT, UPDATE ON [master].[ClientMembers] TO [@0]".Replace("@0", stringID));
         }
     }
 
@@ -170,6 +188,7 @@ public static class ClientHelper
         using (var db = WebMatrix.Data.Database.Open(Website.DBName))
         {
             db.Execute("REVOKE DELETE, INSERT, SELECT, UPDATE ON SCHEMA :: [@0] TO [@0]".Replace("@0", stringID));
+            db.Execute("REVOKE DELETE, INSERT, SELECT, UPDATE ON [master].[ClientMembers] TO [@0]".Replace("@0", stringID));
         }
     }
 

@@ -39,7 +39,6 @@
         WebSecurity.Logout();
     }
 
-    int? HRESULT = null;
     
     // We're actually performing the confirmation
     if (IsPost)
@@ -65,14 +64,14 @@
         
         if (Validation.IsValid())
         {
-            // Update their details
-            HRESULT = UserHelper.ConfirmUser(studentid, Request.Form);
-        
             // Create the login account - now they can log in properly
             WebSecurity.CreateUserAndAccount(studentid, Request.Form["password"]);
-            
+
             // Now log in
             WebSecurity.Login(studentid, Request.Form["password"]);
+
+            // Update their details
+            UserHelper.ConfirmUser(studentid, Request.Form);
 
             Response.Redirect("~/MyMusic");
             return;

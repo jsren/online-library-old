@@ -208,12 +208,16 @@ public static class UserHelper
         if (email != null) email = email.Replace(" ","");
         if (String.Empty == email) email = null;
 
-        return Website.WithDatabase((db) => db.Execute(
-            @"INSERT INTO Members (UUN, FirstName, LastName, Email, IsMember, 
-            JoinDate, IsOrchestra, IsChoir, IsAdmin) VALUES (@0,@1,@2,@3,@4,GETDATE(),@5,@6,@7)",
-            
-            uun, fname, lname, email, (member?"1":"0"),(orchestra?"1":"0"),(choir?"1":"0"),(admin?"1":"0")
-        ));
+        return Website.WithDatabase((db) => {
+            var res = db.Execute(
+                @"INSERT INTO Members (UUN, FirstName, LastName, Email, IsMember, 
+                  JoinDate, IsOrchestra, IsChoir, IsAdmin) VALUES (@0,@1,@2,@3,@4,GETDATE(),@5,@6,@7)",
+
+                uun, fname, lname, email, (member ? "1" : "0"), (orchestra ? "1" : "0"), (choir ? "1" : "0"), (admin ? "1" : "0")
+            );
+            ClientHelper.RegisterMember(ClientHelper.ClientID.ToString(), uun, db);
+            return res;
+        });
     }
 
     public static int SetMemberFlags(string uun, bool isActive, bool isOrchestra, bool isChoir, bool isAdmin)
